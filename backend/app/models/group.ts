@@ -1,7 +1,9 @@
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
-import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany, belongsTo } from '@adonisjs/lucid/orm'
+import type { ManyToMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+
 import User from '#models/user'
+import Organization from '#models/organization'
 
 export default class Group extends BaseModel {
   @column({ isPrimary: true })
@@ -15,6 +17,12 @@ export default class Group extends BaseModel {
 
   @column()
   declare isFromEntra: boolean
+
+  @column()
+  declare organizationId: string
+
+  @belongsTo(() => Organization)
+  declare organization: BelongsTo<typeof Organization>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

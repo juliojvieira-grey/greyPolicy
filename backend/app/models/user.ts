@@ -1,9 +1,23 @@
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
-import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany, belongsTo } from '@adonisjs/lucid/orm'
+import type { ManyToMany, BelongsTo } from '@adonisjs/lucid/types/relations'
+import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens'
 import { DateTime } from 'luxon'
-import Group from '#models/group'
+import hash from '@adonisjs/core/services/hash'
+import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import { compose } from '@adonisjs/core/helpers'
 
-export default class User extends BaseModel {
+import Group from '#models/group'
+import Organization from '#models/organization'
+
+
+const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
+  uids: ['email'],
+  passwordColumnName: 'password',
+})
+
+export default class User extends compose(BaseModel, AuthFinder) {
+  currentAccessToken?: AccessToken
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -13,8 +27,11 @@ export default class User extends BaseModel {
   @column()
   declare email: string
 
+  @column({ serializeAs: null })
+  declare password: string
+
   @column()
-  declare source: 'csv' | 'entra'
+  declare source: 'csv' | 'entra' | 'manual'
 
   @column()
   declare entraId?: string
@@ -22,14 +39,35 @@ export default class User extends BaseModel {
   @column()
   declare managerEmail?: string
 
+  @column()
+  declare role: 'admin' | 'user'
+
+  @column()
+  declare organizationId: string
+
+  @belongsTo(() => Organization)
+  declare organization: BelongsTo<typeof Organization>
+
+  @column()
+  declare createdBy?: string
+
+  @manyToMany(() => Group, {
+    pivotTable: 'group_user',
+  })
+  declare groups: ManyToMany<typeof Group>
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @manyToMany(() => Group, {
-    pivotTable: 'group_user',
+  static accessTokens = DbAccessTokensProvider.forModel(User, {
+    expiresIn: '30 days',
+    prefix: 'oat_',
+    table: 'auth_access_tokens',
+    type: 'auth_token',
+    tokenSecretLength: 40,
   })
-  declare groups: ManyToMany<typeof Group>
+
 }

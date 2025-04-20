@@ -22,5 +22,7 @@ export default class AcknowledgementSeeder extends BaseSeeder {
         signedAt: DateTime.local(),
       },
     ])
+
+    console.log('Aknowledgements created')
   }
 }

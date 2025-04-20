@@ -6,6 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
+      table.uuid('organization_id').notNullable().references('id').inTable('organizations').onDelete('CASCADE')
       table.string('title')
       table.string('category').nullable()
       table.boolean('external_access').defaultTo(false)

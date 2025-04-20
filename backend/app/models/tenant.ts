@@ -1,9 +1,18 @@
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+
+import Organization from '#models/organization'
 
 export default class Tenant extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
+
+  @column()
+  declare organizationId: string
+
+  @belongsTo(() => Organization)
+  declare organization: BelongsTo<typeof Organization>
 
   @column()
   declare name: string

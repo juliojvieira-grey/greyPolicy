@@ -1,7 +1,9 @@
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasMany, belongsTo } from '@adonisjs/lucid/orm'
+import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+
 import PolicyVersion from '#models/policy_version'
+import Organization from '#models/organization'
 
 export default class Policy extends BaseModel {
   @column({ isPrimary: true })
@@ -17,7 +19,10 @@ export default class Policy extends BaseModel {
   declare externalAccess: boolean
 
   @column()
-  declare tenantId?: string
+  declare organizationId: string
+
+  @belongsTo(() => Organization)
+  declare organization: BelongsTo<typeof Organization>
 
   @hasMany(() => PolicyVersion)
   declare versions: HasMany<typeof PolicyVersion>
