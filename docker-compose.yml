@@ -1,0 +1,44 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 5432:5432
+
+  adonis_app:
+    container_name: adonis_app
+    restart: always
+    depends_on:
+      - postgres
+    build:
+      context: ./backend
+    ports:
+      - "${PORT}:${PORT}"
+      - "9229:9229"
+    env_file:
+      - .env
+    environment:
+      DB_CONNECTION: pg
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      NODE_ENV: ${NODE_ENV}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
+      APP_KEY: ${APP_KEY}
+    working_dir: /app
+    volumes:
+      - /app/node_modules
+    command: node build/server.js
+
+volumes:
+  postgres_volume:
