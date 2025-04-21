@@ -10,7 +10,7 @@ const AcknowledgementsController = () => import('#controllers/acknowledgements_c
 const GroupsController = () => import('#controllers/groups_controller')
 const OrganizationsController = () => import('#controllers/organizations_controller')
 const UserImportController = () => import('#controllers/user_imports_controller')
-
+const CategoriesController = () => import('#controllers/categories_controller')
 /**
  * 📂 ROTAS PÚBLICAS (sem autenticação)
  */
@@ -53,6 +53,8 @@ router.group(() => {
   
     // 📥 Importação de usuários via CSV
     router.post('/users/import', [UserImportController, 'store'])
+
+    router.resource('categories', CategoriesController)
   
   }).middleware(middleware.isAdmin())
 

@@ -4,6 +4,7 @@ import { DateTime } from 'luxon'
 
 import PolicyVersion from '#models/policy_version'
 import Organization from '#models/organization'
+import Category from '#models/category'
 
 export default class Policy extends BaseModel {
   @column({ isPrimary: true })
@@ -13,7 +14,10 @@ export default class Policy extends BaseModel {
   declare title: string
 
   @column()
-  declare category?: string
+  declare categoryId: string
+  
+  @belongsTo(() => Category)
+  declare category: BelongsTo<typeof Category>
 
   @column({ columnName: 'organization_id' })
   declare organizationId: string  

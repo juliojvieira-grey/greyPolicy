@@ -8,7 +8,11 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
       table.uuid('organization_id').notNullable().references('id').inTable('organizations').onDelete('CASCADE')
       table.string('title')
-      table.string('category').nullable()
+      table.uuid('category_id')
+      .notNullable()
+      .references('id')
+      .inTable('categories')
+      .onDelete('RESTRICT')
       table.boolean('external_access').defaultTo(false)
 
       table.timestamp('created_at')
