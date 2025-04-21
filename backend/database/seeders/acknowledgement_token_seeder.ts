@@ -10,7 +10,8 @@ export default class AcknowledgementTokenSeeder extends BaseSeeder {
     const now = DateTime.utc()
     const version = await PolicyVersion.query().firstOrFail()
     const users = await User.query().whereIn('email', ['julio@example.com', 'ana@example.com'])
-
+    const expiresAt = now.plus({ days: 7 })
+    
     for (const user of users) {
       const token = randomUUID()
 
@@ -22,6 +23,7 @@ export default class AcknowledgementTokenSeeder extends BaseSeeder {
           createdAt: now,
           updatedAt: now,
           token,
+          expiresAt,
         }
       )
 

@@ -18,6 +18,9 @@ export default class Acknowledgement extends BaseModel {
   declare token: string | null
 
   @column.dateTime()
+  declare expiresAt: DateTime | null
+
+  @column.dateTime()
   declare viewedAt: DateTime | null
   
   @column.dateTime()

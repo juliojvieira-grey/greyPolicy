@@ -45,6 +45,10 @@ export default class AcknowledgementsController {
       return response.notFound({ message: 'Invalid or expired token' })
     }
 
+    if (ack.expiresAt && ack.expiresAt < DateTime.utc()) {
+      return response.gone({ message: 'Este link expirou. Solicite um novo.' })
+    }
+
     const now = DateTime.utc()
 
     if (!ack.viewedAt) {
@@ -70,6 +74,10 @@ export default class AcknowledgementsController {
     const ack = await Acknowledgement.findBy('token', token)
     if (!ack) {
       return response.notFound({ message: 'Token inválido ou inexistente.' })
+    }
+
+    if (ack.expiresAt && ack.expiresAt < DateTime.utc()) {
+      return response.gone({ message: 'Este link expirou. Solicite um novo.' })
     }
 
     if (!ack.viewedAt) {
