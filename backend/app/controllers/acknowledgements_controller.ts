@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Acknowledgement from '#models/acknowledgement'
 import { DateTime } from 'luxon'
+import path from 'node:path'
+import { readFile, access } from 'node:fs/promises'
+import { constants, createReadStream } from 'node:fs'
 
 export default class AcknowledgementsController {
   async index({}: HttpContext) {
@@ -32,7 +35,6 @@ export default class AcknowledgementsController {
 
   /**
    * POST /acknowledgements/accept
-   * Body: { token: string }
    */
   async acceptByToken({ request, response }: HttpContext) {
     const token = request.input('token')
@@ -64,17 +66,16 @@ export default class AcknowledgementsController {
     return response.ok({ message: 'Política já havia sido assinada anteriormente.' })
   }
 
-   /**
+  /**
    * GET /acknowledgements/view/:token
-   * Marca a política como visualizada
    */
-   async viewedByToken({ params, response }: HttpContext) {
+  async viewedByToken({ params, response }: HttpContext) {
     const token = params.token
 
-    const ack = await Acknowledgement.findBy('token', token)
-    if (!ack) {
-      return response.notFound({ message: 'Token inválido ou inexistente.' })
-    }
+    const ack = await Acknowledgement.query()
+      .where('token', token)
+      .preload('policyVersion', (q) => q.preload('policy'))
+      .firstOrFail()
 
     if (ack.expiresAt && ack.expiresAt < DateTime.utc()) {
       return response.gone({ message: 'Este link expirou. Solicite um novo.' })
@@ -85,15 +86,58 @@ export default class AcknowledgementsController {
       await ack.save()
     }
 
-    return response.ok({
-      message: 'Visualização registrada com sucesso.',
-      acknowledgement: {
-        id: ack.id,
-        viewedAt: ack.viewedAt,
-        signedAt: ack.signedAt,
-        userId: ack.userId,
-        policyVersionId: ack.policyVersionId
-      }
-    })
+    const version = ack.policyVersion
+    const policy = version.policy
+
+    const templatePath = path.resolve('resources/static/policy_template.html')
+    let html = await readFile(templatePath, 'utf-8')
+
+    const acceptSection = ack.signedAt
+      ? '<p class="msg">Você já assinou esta política.</p>'
+      : `
+        <form action="/api/acknowledgements/accept" method="POST">
+          <input type="hidden" name="token" value="${ack.token}">
+          <button class="btn" type="submit">Concordo com a política</button>
+        </form>
+      `
+  
+    html = html
+      .replace(/{{POLICY_TITLE}}/g, policy.title)
+      .replace(/{{VERSION}}/g, version.version)
+      .replace(/{{FILE_PATH}}/g, version.filePath)
+      .replace(/{{TOKEN}}/g, ack.token || '')
+      .replace(/{{ACCEPT_SECTION}}/g, acceptSection)
+
+    return response.type('text/html').send(html)
+  }
+
+  /**
+   * GET /acknowledgements/pdf/:token
+   */
+  async pdfByToken({ params, response }: HttpContext) {
+    const token = params.token
+
+    const ack = await Acknowledgement.query()
+      .where('token', token)
+      .preload('policyVersion')
+      .firstOrFail()
+
+    if (ack.expiresAt && ack.expiresAt < DateTime.utc()) {
+      return response.gone({ message: 'Este link expirou. Solicite um novo.' })
+    }
+
+    const safePath = path.basename(ack.policyVersion.filePath)
+    const fullPath = path.resolve('uploads/policies', safePath)
+
+    try {
+      await access(fullPath, constants.F_OK)
+    } catch {
+      return response.notFound({ message: 'Arquivo não encontrado.' })
+    }
+
+    return response
+      .type('application/pdf')
+      .header('Content-Disposition', 'inline')
+      .stream(createReadStream(fullPath))
   }
 }

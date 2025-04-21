@@ -17,6 +17,7 @@ const UserImportController = () => import('#controllers/user_imports_controller'
 router.group(() => {
   router.get('/acknowledgements/view/:token', [AcknowledgementsController, 'viewedByToken'])
   router.post('/acknowledgements/accept', [AcknowledgementsController, 'acceptByToken'])
+  router.get('/acknowledgements/pdf/:token', [AcknowledgementsController, 'pdfByToken'])
 }).prefix('/api')
 
 /**
