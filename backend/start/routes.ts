@@ -37,6 +37,7 @@ router.group(() => {
 
   router.get('/policy-versions', [PolicyVersionsController, 'index'])
   router.get('/policy-versions/:id', [PolicyVersionsController, 'show'])
+  router.get('/policy-versions/:id/download', [PolicyVersionsController, 'download'])
 
   router.get('/acknowledgements', [AcknowledgementsController, 'index'])
 
