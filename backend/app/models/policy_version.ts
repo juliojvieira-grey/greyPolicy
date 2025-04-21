@@ -12,7 +12,7 @@ export default class PolicyVersion extends BaseModel {
   declare policyId: string
 
   @column()
-  declare version: string
+  declare version: number
 
   @column()
   declare filePath: string
@@ -31,4 +31,14 @@ export default class PolicyVersion extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+
+  serialize() {
+    const base = super.serialize()
+    return {
+      ...base,
+      version: Number(this.version).toFixed(1), // Retorna como "1.0", "1.1", etc
+    }
+  }
+  
 }

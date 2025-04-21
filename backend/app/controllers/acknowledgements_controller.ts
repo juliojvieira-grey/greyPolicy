@@ -103,7 +103,7 @@ export default class AcknowledgementsController {
   
     html = html
       .replace(/{{POLICY_TITLE}}/g, policy.title)
-      .replace(/{{VERSION}}/g, version.version)
+      .replace(/{{VERSION}}/g, version.version.toFixed(1))
       .replace(/{{FILE_PATH}}/g, version.filePath)
       .replace(/{{TOKEN}}/g, ack.token || '')
       .replace(/{{ACCEPT_SECTION}}/g, acceptSection)
