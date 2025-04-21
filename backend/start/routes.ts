@@ -14,6 +14,7 @@ const GroupsController = () => import('#controllers/groups_controller')
 const OrganizationsController = () => import('#controllers/organizations_controller')
 const UserImportController = () => import('#controllers/user_imports_controller')
 const CategoriesController = () => import('#controllers/categories_controller')
+const GraphImportController = () => import('#controllers/graph_imports_controller')
 
 /**
  * 📂 ROTAS PÚBLICAS (sem autenticação)
@@ -93,10 +94,14 @@ router.group(() => {
     router.resource('categories', CategoriesController)
 
     // 📥 Importação de usuários via CSV
-    router.post('/users/import', [UserImportController, 'store'])
+    router.post('/users/csv/import', [UserImportController, 'store'])
+    router.get('/users/entra/groups', [GraphImportController, 'listGroups'])
+    router.post('/users/entra/import-group/:groupId', [GraphImportController, 'importByGroup'])
+
     router.get('/groups/:id/users', [GroupsController, 'users'])
     router.post('/groups/:id/users', [GroupsController, 'addUser'])
     router.delete('/groups/:id/users/:userId', [GroupsController, 'removeUser'])
+
   }).middleware(middleware.isAdmin())
 
 }).prefix('/api').use([middleware.auth(), middleware.organization()])

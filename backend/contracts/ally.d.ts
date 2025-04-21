@@ -1,3 +1,5 @@
+// contracts/ally.d.ts
+
 interface EntraIdDriver {
   redirect(): Promise<void>
   accessDenied(): boolean
