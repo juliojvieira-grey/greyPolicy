@@ -14,11 +14,14 @@ export default class Acknowledgement extends BaseModel {
   @column()
   declare policyVersionId: string
 
-  @column.dateTime()
-  declare viewedAt?: DateTime
+  @column()
+  declare token: string | null
 
   @column.dateTime()
-  declare signedAt?: DateTime
+  declare viewedAt: DateTime | null
+  
+  @column.dateTime()
+  declare signedAt: DateTime | null
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>

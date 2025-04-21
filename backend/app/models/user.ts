@@ -42,13 +42,13 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare role: 'admin' | 'user'
 
-  @column()
+  @column({ columnName: 'organization_id' })
   declare organizationId: string
 
   @belongsTo(() => Organization)
   declare organization: BelongsTo<typeof Organization>
 
-  @column()
+  @column({ columnName: 'created_by' })
   declare createdBy?: string
 
   @manyToMany(() => Group, {

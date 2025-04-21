@@ -26,5 +26,6 @@ export default class PolicyVersionsController {
   async destroy({ params }: HttpContext) {
     const version = await PolicyVersion.findOrFail(params.id)
     await version.delete()
-  }
+    return { message: 'Policy version deleted successfully' }
+  }  
 }

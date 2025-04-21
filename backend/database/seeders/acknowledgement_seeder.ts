@@ -10,19 +10,30 @@ export default class AcknowledgementSeeder extends BaseSeeder {
     const user2 = await User.findByOrFail('email', 'ana@example.com')
     const version = await PolicyVersion.query().firstOrFail()
 
-    await Acknowledgement.createMany([
-      {
-        userId: user1.id,
-        policyVersionId: version.id,
-        signedAt: DateTime.local(),
-      },
-      {
-        userId: user2.id,
-        policyVersionId: version.id,
-        signedAt: DateTime.local(),
-      },
-    ])
+    const now = DateTime.utc()
 
-    console.log('Aknowledgements created')
+    await Acknowledgement.updateOrCreateMany(
+      ['userId', 'policyVersionId'],
+      [
+        {
+          userId: user1.id,
+          policyVersionId: version.id,
+          viewedAt: now,
+          signedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          userId: user2.id,
+          policyVersionId: version.id,
+          viewedAt: now,
+          signedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ]
+    )
+
+    console.log('Acknowledgements created')
   }
 }

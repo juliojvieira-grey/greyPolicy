@@ -7,7 +7,15 @@ export default class UsersController {
   }
 
   async store({ request }: HttpContext) {
-    const data = request.only(['name', 'email'])
+    const data = request.only([
+      'fullName',
+      'email',
+      'password',
+      'source',
+      'role',
+      'organizationId',
+      'createdBy'
+    ])
     return User.create(data)
   }
 
@@ -17,7 +25,7 @@ export default class UsersController {
 
   async update({ params, request }: HttpContext) {
     const user = await User.findOrFail(params.id)
-    const data = request.only(['name', 'email'])
+    const data = request.only(['fullName', 'email', 'role'])
     user.merge(data)
     await user.save()
     return user
@@ -26,5 +34,6 @@ export default class UsersController {
   async destroy({ params }: HttpContext) {
     const user = await User.findOrFail(params.id)
     await user.delete()
+    return { message: 'User deleted successfully' }
   }
 }

@@ -7,7 +7,14 @@ export default class PoliciesController {
   }
 
   async store({ request }: HttpContext) {
-    const data = request.only(['title', 'tenantId'])
+    console.log(request.all())
+
+    const data = request.only([
+      'title',
+      'category',
+      'externalAccess',
+      'organizationId'
+    ])
     return Policy.create(data)
   }
 
@@ -17,7 +24,12 @@ export default class PoliciesController {
 
   async update({ params, request }: HttpContext) {
     const policy = await Policy.findOrFail(params.id)
-    const data = request.only(['title'])
+    const data = request.only([
+      'title',
+      'category',
+      'externalAccess',
+      'organizationId'
+    ])
     policy.merge(data)
     await policy.save()
     return policy
@@ -26,5 +38,6 @@ export default class PoliciesController {
   async destroy({ params }: HttpContext) {
     const policy = await Policy.findOrFail(params.id)
     await policy.delete()
+    return { message: 'Policy deleted successfully' }
   }
 }

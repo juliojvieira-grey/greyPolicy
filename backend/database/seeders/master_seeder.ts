@@ -7,6 +7,7 @@ import TenantSeeder from './tenant_seeder.js'
 import PolicySeeder from './policy_seeder.js'
 import PolicyVersionSeeder from './policy_version_seeder.js'
 import AcknowledgementSeeder from './acknowledgement_seeder.js'
+import AcknowledgementTokenSeeder from './acknowledgement_token_seeder.js'
 
 export default class MasterSeeder extends BaseSeeder {
   public async run () {
@@ -17,5 +18,6 @@ export default class MasterSeeder extends BaseSeeder {
     await new PolicySeeder(this.client).run()
     await new PolicyVersionSeeder(this.client).run()
     await new AcknowledgementSeeder(this.client).run()
+    await new AcknowledgementTokenSeeder(this.client).run()
   }
 }

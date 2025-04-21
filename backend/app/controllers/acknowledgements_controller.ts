@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Acknowledgement from '#models/acknowledgement'
+import { DateTime } from 'luxon'
 
 export default class AcknowledgementsController {
   async index({}: HttpContext) {
@@ -26,5 +27,65 @@ export default class AcknowledgementsController {
   async destroy({ params }: HttpContext) {
     const ack = await Acknowledgement.findOrFail(params.id)
     await ack.delete()
+    return { message: 'Acknowledgement deleted' }
+  }
+
+  /**
+   * POST /acknowledgements/accept
+   * Body: { token: string }
+   */
+  async acceptByToken({ request, response }: HttpContext) {
+    const token = request.input('token')
+    if (!token) {
+      return response.badRequest({ message: 'Token is required' })
+    }
+
+    const ack = await Acknowledgement.findBy('token', token)
+    if (!ack) {
+      return response.notFound({ message: 'Invalid or expired token' })
+    }
+
+    const now = DateTime.utc()
+
+    if (!ack.viewedAt) {
+      ack.viewedAt = now
+    }
+
+    if (!ack.signedAt) {
+      ack.signedAt = now
+      await ack.save()
+      return response.ok({ message: 'Política assinada com sucesso.' })
+    }
+
+    return response.ok({ message: 'Política já havia sido assinada anteriormente.' })
+  }
+
+   /**
+   * GET /acknowledgements/view/:token
+   * Marca a política como visualizada
+   */
+   async viewedByToken({ params, response }: HttpContext) {
+    const token = params.token
+
+    const ack = await Acknowledgement.findBy('token', token)
+    if (!ack) {
+      return response.notFound({ message: 'Token inválido ou inexistente.' })
+    }
+
+    if (!ack.viewedAt) {
+      ack.viewedAt = DateTime.utc()
+      await ack.save()
+    }
+
+    return response.ok({
+      message: 'Visualização registrada com sucesso.',
+      acknowledgement: {
+        id: ack.id,
+        viewedAt: ack.viewedAt,
+        signedAt: ack.signedAt,
+        userId: ack.userId,
+        policyVersionId: ack.policyVersionId
+      }
+    })
   }
 }

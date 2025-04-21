@@ -10,7 +10,6 @@ export default class extends BaseSchema {
       table.string('title')
       table.string('category').nullable()
       table.boolean('external_access').defaultTo(false)
-      table.uuid('tenant_id').unsigned().references('id').inTable('tenants').onDelete('SET NULL')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

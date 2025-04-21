@@ -15,11 +15,11 @@ export default class Policy extends BaseModel {
   @column()
   declare category?: string
 
-  @column()
+  @column({ columnName: 'organization_id' })
+  declare organizationId: string  
+  
+  @column({ columnName: 'external_access' })
   declare externalAccess: boolean
-
-  @column()
-  declare organizationId: string
 
   @belongsTo(() => Organization)
   declare organization: BelongsTo<typeof Organization>
