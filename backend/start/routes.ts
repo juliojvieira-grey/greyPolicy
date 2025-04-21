@@ -1,5 +1,8 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import User from '#models/user'
+import type { HttpContext } from '@adonisjs/core/http'
+
 
 // Controllers
 const SessionController = () => import('#controllers/session_controller')
@@ -11,6 +14,7 @@ const GroupsController = () => import('#controllers/groups_controller')
 const OrganizationsController = () => import('#controllers/organizations_controller')
 const UserImportController = () => import('#controllers/user_imports_controller')
 const CategoriesController = () => import('#controllers/categories_controller')
+
 /**
  * 📂 ROTAS PÚBLICAS (sem autenticação)
  */
@@ -21,11 +25,47 @@ router.group(() => {
 }).prefix('/api')
 
 /**
- * 🔐 AUTENTICAÇÃO
+ * 🔐 AUTENTICAÇÃO E ENTRA ID
  */
 router.group(() => {
   router.post('/login', [SessionController, 'store'])
   router.delete('/logout', [SessionController, 'destroy']).use(middleware.auth({ guards: ['api'] }))
+
+  // Redireciona para o login da Microsoft (Entra ID)
+  router.get('/auth/entra_id/redirect', async ({ ally }: HttpContext) => {
+    return (ally as any).use('entra_id').redirect()
+  })
+
+  // Callback após autenticação pela Microsoft
+  router.get('/auth/entra_id/callback', async ({ ally, response, auth }: HttpContext) => {
+    const entra = (ally as any).use('entra_id')
+  
+    if (entra.accessDenied()) return response.unauthorized()
+    if (entra.hasError()) return response.badRequest({ message: entra.getError() })
+  
+    const msUser = await entra.user()
+  
+    let user
+  
+    try {
+      user = await User.findByOrFail('email', msUser.email)
+    } catch {
+      return response.unauthorized({ message: 'Usuário não autorizado para login via Entra ID.' })
+    }
+  
+    const token = await auth.use('api').createToken(user)
+  
+    return response.ok({
+      type: 'bearer',
+      token: token.value!.release(),
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        organizationId: user.organizationId,
+      },
+    })
+  })
 }).prefix('/api')
 
 /**
@@ -50,16 +90,13 @@ router.group(() => {
     router.resource('users', UsersController)
     router.resource('groups', GroupsController)
     router.resource('organizations', OrganizationsController)
-  
+    router.resource('categories', CategoriesController)
+
     // 📥 Importação de usuários via CSV
     router.post('/users/import', [UserImportController, 'store'])
-
     router.get('/groups/:id/users', [GroupsController, 'users'])
     router.post('/groups/:id/users', [GroupsController, 'addUser'])
     router.delete('/groups/:id/users/:userId', [GroupsController, 'removeUser'])
-
-    router.resource('categories', CategoriesController)
-  
   }).middleware(middleware.isAdmin())
 
 }).prefix('/api').use([middleware.auth(), middleware.organization()])

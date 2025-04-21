@@ -11,13 +11,13 @@ export default class extends BaseSeeder {
     await PolicyVersion.createMany([
       {
         policyId: policy1.id,
-        version: '1.0',
+        version: 1.0,
         filePath: '/storage/policies/policy1-v1.pdf',
         publishedAt: DateTime.local(),
       },
       {
         policyId: policy2.id,
-        version: '1.0',
+        version: 1.0,
         filePath: '/storage/policies/policy2-v1.pdf',
         publishedAt: DateTime.local(),
       },
