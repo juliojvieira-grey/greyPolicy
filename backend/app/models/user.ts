@@ -52,7 +52,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare createdBy?: string
 
   @manyToMany(() => Group, {
-    pivotTable: 'group_user',
+    pivotTable: 'group_users',
   })
   declare groups: ManyToMany<typeof Group>
 

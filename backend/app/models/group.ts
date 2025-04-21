@@ -24,14 +24,15 @@ export default class Group extends BaseModel {
   @belongsTo(() => Organization)
   declare organization: BelongsTo<typeof Organization>
 
+  @manyToMany(() => User, {
+    pivotTable: 'group_users',
+  })
+
+  declare users: ManyToMany<typeof User>
+  
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
-
-  @manyToMany(() => User, {
-    pivotTable: 'group_user',
-  })
-  declare users: ManyToMany<typeof User>
 }

@@ -54,6 +54,10 @@ router.group(() => {
     // 📥 Importação de usuários via CSV
     router.post('/users/import', [UserImportController, 'store'])
 
+    router.get('/groups/:id/users', [GroupsController, 'users'])
+    router.post('/groups/:id/users', [GroupsController, 'addUser'])
+    router.delete('/groups/:id/users/:userId', [GroupsController, 'removeUser'])
+
     router.resource('categories', CategoriesController)
   
   }).middleware(middleware.isAdmin())

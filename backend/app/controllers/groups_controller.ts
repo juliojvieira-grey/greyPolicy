@@ -27,4 +27,32 @@ export default class GroupsController {
     const group = await Group.findOrFail(params.id)
     await group.delete()
   }
+
+  // GET /groups/:id/users
+  async users({ params }: HttpContext) {
+    const group = await Group.findOrFail(params.id)
+    await group.load('users')
+    return group.users
+  }
+
+// POST /groups/:id/users
+  async addUser({ params, request, response }: HttpContext) {
+    const group = await Group.findOrFail(params.id)
+    const userId = request.input('userId')
+
+    if (!userId) {
+      return response.badRequest({ message: 'userId é obrigatório' })
+    }
+
+    await group.related('users').attach([userId])
+    return response.ok({ message: 'Usuário adicionado ao grupo' })
+  }
+
+  // DELETE /groups/:groupId/users/:userId
+  async removeUser({ params, response }: HttpContext) {
+    const group = await Group.findOrFail(params.id)
+    await group.related('users').detach([params.userId])
+    return response.ok({ message: 'Usuário removido do grupo' })
+  }
+
 }
