@@ -9,6 +9,7 @@ const PolicyVersionsController = () => import('#controllers/policy_versions_cont
 const AcknowledgementsController = () => import('#controllers/acknowledgements_controller')
 const GroupsController = () => import('#controllers/groups_controller')
 const OrganizationsController = () => import('#controllers/organizations_controller')
+const UserImportController = () => import('#controllers/user_imports_controller')
 
 /**
  * 📂 ROTAS PÚBLICAS (sem autenticação)
@@ -47,6 +48,10 @@ router.group(() => {
     router.resource('users', UsersController)
     router.resource('groups', GroupsController)
     router.resource('organizations', OrganizationsController)
+  
+    // 📥 Importação de usuários via CSV
+    router.post('/users/import', [UserImportController, 'store'])
+  
   }).middleware(middleware.isAdmin())
 
 }).prefix('/api').use([middleware.auth(), middleware.organization()])
