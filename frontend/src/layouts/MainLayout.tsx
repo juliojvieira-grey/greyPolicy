@@ -34,7 +34,7 @@ import {
   } from '@mui/icons-material'
   
   import { useState } from 'react'
-  import { useNavigate, NavLink, Outlet, useLocation } from 'react-router-dom'
+  import { NavLink, Outlet, useLocation } from 'react-router-dom'
   import { useAuth } from '../hooks/useAuth'
   
   const drawerWidth = 240
@@ -42,7 +42,6 @@ import {
   export default function MainLayout() {
     const { user, isAdmin, logout } = useAuth()
     const location = useLocation()
-    const navigate = useNavigate()
   
     const [mobileOpen, setMobileOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)

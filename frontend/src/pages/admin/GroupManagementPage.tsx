@@ -38,7 +38,7 @@ const rows: GroupRow[] = [
 ]
 
 export default function GroupManagementPage() {
-  const [groups, setGroups] = useState<GroupRow[]>(rows)
+  const [groups] = useState<GroupRow[]>(rows)
 
   const columns: GridColDef[] = [
     { field: 'name', headerName: 'Nome do Grupo', flex: 1 },
