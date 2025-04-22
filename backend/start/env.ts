@@ -33,6 +33,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   MICROSOFT_CLIENT_SECRET: Env.schema.string(),
   MICROSOFT_CALLBACK_URL: Env.schema.string(),
   MICROSOFT_TENANT_ID: Env.schema.string(),
+
+  REDIS_HOST: Env.schema.string(),
+  REDIS_PORT: Env.schema.number(),
   
 })
 

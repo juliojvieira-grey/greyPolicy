@@ -52,4 +52,38 @@ export default class MsGraphService {
   
     return res.data
   }
+
+
+  public async sendEmail(to: string, subject: string, html: string) {
+    const token = await this.authenticate()
+
+    const sender = process.env.MICROSOFT_SENDER
+
+    await axios.post(
+      `https://graph.microsoft.com/v1.0/users/${sender}/sendMail`,
+      {
+        message: {
+          subject,
+          body: {
+            contentType: 'HTML',
+            content: html,
+          },
+          toRecipients: [
+            {
+              emailAddress: {
+                address: to,
+              },
+            },
+          ],
+        },
+        saveToSentItems: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+  }
 }

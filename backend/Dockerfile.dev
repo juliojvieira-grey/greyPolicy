@@ -12,4 +12,4 @@ RUN npm install
 EXPOSE 3333 9229
 
 # Comando padrão em modo dev com ts-node e ace
-CMD ["node", "ace", "serve", "--watch"]
+CMD ["node", "ace", "serve", "--hmr"]

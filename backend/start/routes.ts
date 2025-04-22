@@ -102,6 +102,10 @@ router.group(() => {
     router.post('/groups/:id/users', [GroupsController, 'addUser'])
     router.delete('/groups/:id/users/:userId', [GroupsController, 'removeUser'])
 
+    router.post('/policies/:id/send/user/:userId', [PoliciesController, 'sendToUser'])
+    router.post('/policies/:id/send/user/:groupId', [PoliciesController, 'sendToGroup'])
+
+
   }).middleware(middleware.isAdmin())
 
 }).prefix('/api').use([middleware.auth(), middleware.organization()])

@@ -1,5 +1,5 @@
-import { BaseModel, column, manyToMany, belongsTo } from '@adonisjs/lucid/orm'
-import type { ManyToMany, BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, manyToMany, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import type { ManyToMany, BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens'
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
@@ -8,6 +8,7 @@ import { compose } from '@adonisjs/core/helpers'
 
 import Group from '#models/group'
 import Organization from '#models/organization'
+import Acknowledgement from './acknowledgement.js'
 
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -55,6 +56,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     pivotTable: 'group_users',
   })
   declare groups: ManyToMany<typeof Group>
+
+  @hasMany(() => Acknowledgement)
+  declare acknowledgements: HasMany<typeof Acknowledgement>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
