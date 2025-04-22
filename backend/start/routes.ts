@@ -2,6 +2,7 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
+import AdminDashboardController from '#controllers/admin_dashboard_controller'
 
 
 // Controllers
@@ -63,6 +64,7 @@ router.group(() => {
         fullName: user.fullName,
         role: user.role,
         organizationId: user.organizationId,
+        provider: 'microsoft',
       }))}`
     )
     
@@ -92,6 +94,8 @@ router.group(() => {
     router.resource('groups', GroupsController)
     router.resource('organizations', OrganizationsController)
     router.resource('categories', CategoriesController)
+
+    router.get('/admin/dashboard', [AdminDashboardController, 'index'])
 
     // 📥 Importação de usuários via CSV
     router.post('/users/csv/import', [UserImportController, 'store'])

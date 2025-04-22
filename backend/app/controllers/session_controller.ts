@@ -15,6 +15,7 @@ export default class SessionController {
         email: user.email,
         role: user.role,
         organizationId: user.organizationId,
+        provider: 'local',
       }
     }
   }
