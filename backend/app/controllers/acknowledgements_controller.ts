@@ -41,28 +41,39 @@ export default class AcknowledgementsController {
     if (!token) {
       return response.badRequest({ message: 'Token is required' })
     }
-
+  
     const ack = await Acknowledgement.findBy('token', token)
     if (!ack) {
       return response.notFound({ message: 'Invalid or expired token' })
     }
-
+  
     if (ack.expiresAt && ack.expiresAt < DateTime.utc()) {
       return response.gone({ message: 'Este link expirou. Solicite um novo.' })
     }
-
+  
     const now = DateTime.utc()
-
+  
     if (!ack.viewedAt) {
       ack.viewedAt = now
     }
-
+  
     if (!ack.signedAt) {
       ack.signedAt = now
+  
+      // captura informações do request
+      const ip = request.ip()
+      const userAgent = request.header('user-agent') || 'Desconhecido'
+  
+      ack.merge({
+        signedIp: ip,
+        signedUserAgent: userAgent,
+      })
+  
       await ack.save()
+  
       return response.ok({ message: 'Política assinada com sucesso.' })
     }
-
+  
     return response.ok({ message: 'Política já havia sido assinada anteriormente.' })
   }
 

@@ -55,17 +55,17 @@ router.group(() => {
     }
   
     const token = await auth.use('api').createToken(user)
-  
-    return response.ok({
-      type: 'bearer',
-      token: token.value!.release(),
-      user: {
+
+    return response.redirect(
+      `http://localhost:5173/auth/callback?token=${token.value!.release()}&user=${encodeURIComponent(JSON.stringify({
         id: user.id,
         email: user.email,
+        fullName: user.fullName,
         role: user.role,
         organizationId: user.organizationId,
-      },
-    })
+      }))}`
+    )
+    
   })
 }).prefix('/api')
 

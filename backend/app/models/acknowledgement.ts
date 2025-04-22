@@ -18,6 +18,12 @@ export default class Acknowledgement extends BaseModel {
   @column()
   declare token: string | null
 
+  @column()
+  declare signedIp: string | null
+
+  @column()
+  declare signedUserAgent: string | null
+
   @column.dateTime()
   declare expiresAt: DateTime | null
 
