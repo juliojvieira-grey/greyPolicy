@@ -24,6 +24,7 @@ import AdminPage from './pages/admin/AdminPage'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import GroupManagementPage from './pages/admin/GroupManagementPage'
 import CategoryManagementPage from './pages/admin/settingsPage'
+import SignedOut from './pages/auth/SignedOut'
 
 
 
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/signed-out" element={<SignedOut />} />
         <Route path="*" element={<NotFound />} />
         
         <Route element={<MainLayout />}>

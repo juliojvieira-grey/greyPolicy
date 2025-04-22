@@ -16,11 +16,12 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useState } from 'react'
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 
 export default function LoginPage() {
-  const { login, loginWithEntraId } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -35,7 +36,9 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await login(email, password)
+      const response = await api.post('/api/login', { email, password })
+      const { token, user } = response.data
+      login(token, user, 'local')
       navigate('/dashboard')
     } catch (err: any) {
       setError('E-mail ou senha inválidos')
@@ -108,7 +111,7 @@ export default function LoginPage() {
               variant="outlined"
               color="secondary"
               sx={{ mt: 2 }}
-              onClick={loginWithEntraId}
+              onClick={() => window.location.href = import.meta.env.VITE_API_BASE_URL + '/api/auth/entra_id/redirect'}
             >
               Entrar com Microsoft
             </Button> 

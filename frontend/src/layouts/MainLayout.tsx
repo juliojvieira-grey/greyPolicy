@@ -3,7 +3,6 @@ import {
     Avatar,
     Box,
     Button,
-    Collapse,
     Dialog,
     DialogActions,
     DialogContent,
@@ -26,14 +25,11 @@ import {
   import {
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
-    Policy as PolicyIcon,
     CheckCircle as CheckCircleIcon,
     AdminPanelSettings as AdminIcon,
     Group as GroupIcon,
     People as PeopleIcon,
     Settings as SettingIcon,
-    ExpandLess,
-    ExpandMore,
     Logout as LogoutIcon,
   } from '@mui/icons-material'
   
@@ -49,7 +45,6 @@ import {
     const navigate = useNavigate()
   
     const [mobileOpen, setMobileOpen] = useState(false)
-    const [adminOpen, setAdminOpen] = useState(false)
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
   
@@ -68,7 +63,7 @@ import {
   
     const cancelLogout = () => setLogoutDialogOpen(false)
   
-    const isActive = (path: string) => location.pathname.startsWith(path)
+    const isActive = (path: string) => location.pathname === path
   
     const drawerItemStyle = (path: string) => ({
       ...(isActive(path) && {
@@ -91,64 +86,45 @@ import {
           </ListItem>
   
           <ListItem disablePadding>
-            <ListItemButton component={NavLink} to="/policies" sx={drawerItemStyle('/policies')}>
-              <ListItemIcon><PolicyIcon /></ListItemIcon>
-              <ListItemText primary="Políticas" />
-            </ListItemButton>
-          </ListItem>
-  
-          <ListItem disablePadding>
             <ListItemButton component={NavLink} to="/acknowledgements" sx={drawerItemStyle('/acknowledgements')}>
               <ListItemIcon><CheckCircleIcon /></ListItemIcon>
               <ListItemText primary="Aceites" />
             </ListItemButton>
           </ListItem>
+  
+          {isAdmin && (
+            <>
+              <Divider />
+              <ListItem disablePadding>
+                <ListItemButton component={NavLink} to="/admin" sx={drawerItemStyle('/admin')}>
+                  <ListItemIcon><AdminIcon /></ListItemIcon>
+                  <ListItemText primary="Painel Admin" />
+                </ListItemButton>
+              </ListItem>
+  
+              <ListItem disablePadding>
+                <ListItemButton component={NavLink} to="/admin/users" sx={drawerItemStyle('/admin/users')}>
+                  <ListItemIcon><PeopleIcon /></ListItemIcon>
+                  <ListItemText primary="Usuários" />
+                </ListItemButton>
+              </ListItem>
+  
+              <ListItem disablePadding>
+                <ListItemButton component={NavLink} to="/admin/groups" sx={drawerItemStyle('/admin/groups')}>
+                  <ListItemIcon><GroupIcon /></ListItemIcon>
+                  <ListItemText primary="Grupos" />
+                </ListItemButton>
+              </ListItem>
+  
+              <ListItem disablePadding>
+                <ListItemButton component={NavLink} to="/admin/settings" sx={drawerItemStyle('/admin/settings')}>
+                  <ListItemIcon><SettingIcon /></ListItemIcon>
+                  <ListItemText primary="Configurações" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
         </List>
-  
-        {isAdmin && (
-          <>
-            <Divider />
-            <List>
-              <ListItemButton onClick={() => setAdminOpen(!adminOpen)}>
-                <ListItemIcon><AdminIcon /></ListItemIcon>
-                <ListItemText primary="Administração" />
-                {adminOpen ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-  
-              <Collapse in={adminOpen} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  <ListItem disablePadding>
-                    <ListItemButton component={NavLink} to="/admin" sx={{ pl: 4, ...drawerItemStyle('/admin') }}>
-                      <ListItemIcon><AdminIcon /></ListItemIcon>
-                      <ListItemText primary="Painel Admin" />
-                    </ListItemButton>
-                  </ListItem>
-  
-                  <ListItem disablePadding>
-                    <ListItemButton component={NavLink} to="/admin/users" sx={{ pl: 4, ...drawerItemStyle('/admin/users') }}>
-                      <ListItemIcon><PeopleIcon /></ListItemIcon>
-                      <ListItemText primary="Usuários" />
-                    </ListItemButton>
-                  </ListItem>
-  
-                  <ListItem disablePadding>
-                    <ListItemButton component={NavLink} to="/admin/groups" sx={{ pl: 4, ...drawerItemStyle('/admin/groups') }}>
-                      <ListItemIcon><GroupIcon /></ListItemIcon>
-                      <ListItemText primary="Grupos" />
-                    </ListItemButton>
-                  </ListItem>
-  
-                  <ListItem disablePadding>
-                    <ListItemButton component={NavLink} to="/admin/settings" sx={{ pl: 4, ...drawerItemStyle('/admin/settings') }}>
-                      <ListItemIcon><SettingIcon /></ListItemIcon>
-                      <ListItemText primary="Configurações" />
-                    </ListItemButton>
-                  </ListItem>
-                </List>
-              </Collapse>
-            </List>
-          </>
-        )}
   
         <Divider sx={{ mt: 2 }} />
         <List>
@@ -181,7 +157,6 @@ import {
           </Toolbar>
         </AppBar>
   
-        {/* Menu suspenso */}
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
           <MenuItem disabled>{user?.email}</MenuItem>
           <MenuItem onClick={handleLogoutClick}>
@@ -190,7 +165,6 @@ import {
           </MenuItem>
         </Menu>
   
-        {/* Diálogo de logout */}
         <Dialog open={logoutDialogOpen} onClose={cancelLogout}>
           <DialogTitle>Deseja sair?</DialogTitle>
           <DialogContent>
@@ -202,7 +176,6 @@ import {
           </DialogActions>
         </Dialog>
   
-        {/* Drawer permanente */}
         <Drawer
           variant="permanent"
           sx={{
@@ -216,7 +189,6 @@ import {
           {drawer}
         </Drawer>
   
-        {/* Drawer responsivo */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -230,7 +202,6 @@ import {
           {drawer}
         </Drawer>
   
-        {/* Conteúdo principal */}
         <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}>
           <Toolbar />
           <Outlet />
@@ -238,4 +209,3 @@ import {
       </Box>
     )
   }
-  

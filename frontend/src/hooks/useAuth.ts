@@ -46,9 +46,17 @@ export function useAuth() {
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    setToken(null)
-    setUser(null)
-    window.location.href = '/login'
+  
+    const provider = localStorage.getItem('login_provider') as 'local' | 'microsoft' | null
+    localStorage.removeItem('login_provider')
+  
+    if (provider === 'microsoft') {
+      const postLogoutRedirectUri = encodeURIComponent('http://localhost:5173/login')
+      const microsoftLogoutUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`
+      window.location.href = microsoftLogoutUrl
+    } else {
+      window.location.href = '/login'
+    }
   }
 
   return {
