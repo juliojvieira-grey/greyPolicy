@@ -17,6 +17,9 @@ export default class PolicyVersion extends BaseModel {
   @column()
   declare filePath: string
 
+  @column()
+  declare status: 'draft' | 'ativo' | 'expirado'
+
   @column.dateTime()
   declare publishedAt: DateTime
 

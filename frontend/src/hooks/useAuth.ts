@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getApiUrl, getAppUrl } from '../utils/env'
 
 export function useAuth() {
   const [token, setToken] = useState<string | null>(null)
@@ -34,29 +35,24 @@ export function useAuth() {
     const data = await response.json()
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
+    
     setToken(data.token)
     setUser(data.user)
   }
 
   const loginWithEntraId = async () => {
     // Redireciona para o provedor Microsoft
-    window.location.href = 'http://localhost:3333/api/auth/entra_id/redirect'
+    window.location.href = `${getApiUrl()}/api/auth/entra_id/redirect`
   }
 
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+
+    const postLogoutRedirectUri = encodeURIComponent(`${getAppUrl()}/login`)
+    const microsoftLogoutUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`
   
-    const provider = localStorage.getItem('login_provider') as 'local' | 'microsoft' | null
-    localStorage.removeItem('login_provider')
-  
-    if (provider === 'microsoft') {
-      const postLogoutRedirectUri = encodeURIComponent('http://localhost:5173/login')
-      const microsoftLogoutUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=${postLogoutRedirectUri}`
-      window.location.href = microsoftLogoutUrl
-    } else {
-      window.location.href = '/login'
-    }
+    window.location.href = microsoftLogoutUrl
   }
 
   return {

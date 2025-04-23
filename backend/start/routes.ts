@@ -4,7 +4,6 @@ import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import AdminDashboardController from '#controllers/admin_dashboard_controller'
 
-
 // Controllers
 const SessionController = () => import('#controllers/session_controller')
 const UsersController = () => import('#controllers/users_controller')
@@ -41,33 +40,28 @@ router.group(() => {
   // Callback após autenticação pela Microsoft
   router.get('/auth/entra_id/callback', async ({ ally, response, auth }: HttpContext) => {
     const entra = (ally as any).use('entra_id')
-  
+
     if (entra.accessDenied()) return response.unauthorized()
     if (entra.hasError()) return response.badRequest({ message: entra.getError() })
-  
+
     const msUser = await entra.user()
-  
+
     let user
-  
     try {
       user = await User.findByOrFail('email', msUser.email)
     } catch {
       return response.unauthorized({ message: 'Usuário não autorizado para login via Entra ID.' })
     }
-  
+
     const token = await auth.use('api').createToken(user)
+    const releasedToken = token.value?.release()
+    if (!releasedToken) {
+      return response.internalServerError({ message: 'Erro ao gerar token' })
+    }
 
     return response.redirect(
-      `http://localhost:5173/auth/callback?token=${token.value!.release()}&user=${encodeURIComponent(JSON.stringify({
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        organizationId: user.organizationId,
-        provider: 'microsoft',
-      }))}`
+      `${process.env.VITE_APP_URL}/auth/callback?token=${releasedToken}`
     )
-    
   })
 }).prefix('/api')
 
@@ -106,10 +100,8 @@ router.group(() => {
     router.post('/groups/:id/users', [GroupsController, 'addUser'])
     router.delete('/groups/:id/users/:userId', [GroupsController, 'removeUser'])
 
-    router.post('/policies/:id/send/user/:userId', [PoliciesController, 'sendToUser'])
-    router.post('/policies/:id/send/user/:groupId', [PoliciesController, 'sendToGroup'])
-
-
+    router.post('/policies/:id/send-to-user/:userId', [PoliciesController, 'sendToUser'])
+    router.post('/policies/:id/send-to-group/:groupId', [PoliciesController, 'sendToGroup'])
   }).middleware(middleware.isAdmin())
 
 }).prefix('/api').use([middleware.auth(), middleware.organization()])

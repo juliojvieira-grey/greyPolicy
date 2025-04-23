@@ -14,12 +14,14 @@ export default class extends BaseSeeder {
         version: 1.0,
         filePath: '/storage/policies/policy1-v1.pdf',
         publishedAt: DateTime.local(),
+        status: 'ativo'
       },
       {
         policyId: policy2.id,
         version: 1.0,
         filePath: '/storage/policies/policy2-v1.pdf',
         publishedAt: DateTime.local(),
+        status: 'ativo'
       },
     ])
 

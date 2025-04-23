@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
+import { getApiUrl } from '../../utils/env'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -111,7 +112,7 @@ export default function LoginPage() {
               variant="outlined"
               color="secondary"
               sx={{ mt: 2 }}
-              onClick={() => window.location.href = import.meta.env.VITE_API_BASE_URL + '/api/auth/entra_id/redirect'}
+              onClick={() => window.location.href = getApiUrl() + '/api/auth/entra_id/redirect'}
             >
               Entrar com Microsoft
             </Button> 

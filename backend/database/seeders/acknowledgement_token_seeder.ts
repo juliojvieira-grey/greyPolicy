@@ -25,8 +25,8 @@ export default class AcknowledgementTokenSeeder extends BaseSeeder {
       )
 
       console.log(`Link de aceite para ${user.email}:`)
-      console.log(`🔗 View URL:     http://localhost:3333/acknowledgements/view/${ack.token}`)
-      console.log(`✅ Accept URL:   http://localhost:3333/acknowledgements/accept (token: "${ack.token}")\n`)
+      console.log(`🔗 View URL:     ${process.env.API_URL}/acknowledgements/view/${ack.token}`)
+      console.log(`✅ Accept URL:   ${process.env.API_URL}/acknowledgements/accept (token: "${ack.token}")\n`)
     }
 
     console.log('Tokens de acknowledgements criados com sucesso.')

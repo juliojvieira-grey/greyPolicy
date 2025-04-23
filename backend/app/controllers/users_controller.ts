@@ -1,39 +1,59 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
+import { apiResponse } from '#utils/response'
 
 export default class UsersController {
-  async index({}: HttpContext) {
-    return User.all()
+  async index({ response }: HttpContext) {
+    const users = await User.all()
+    return response.ok(apiResponse(true, 'Lista de usuários obtida com sucesso', users))
   }
 
-  async store({ request }: HttpContext) {
-    const data = request.only([
-      'fullName',
-      'email',
-      'password',
-      'source',
-      'role',
-      'organizationId',
-      'createdBy'
-    ])
-    return User.create(data)
+  async store({ request, response }: HttpContext) {
+    try {
+      const data = request.only([
+        'fullName',
+        'email',
+        'password',
+        'source',
+        'role',
+        'organizationId',
+        'createdBy'
+      ])
+      const user = await User.create(data)
+      return response.created(apiResponse(true, 'Usuário criado com sucesso', user))
+    } catch {
+      return response.internalServerError(apiResponse(false, 'Erro ao criar usuário'))
+    }
   }
 
-  async show({ params }: HttpContext) {
-    return User.findOrFail(params.id)
+  async show({ params, response }: HttpContext) {
+    try {
+      const user = await User.findOrFail(params.id)
+      return response.ok(apiResponse(true, 'Usuário encontrado', user))
+    } catch {
+      return response.notFound(apiResponse(false, 'Usuário não encontrado'))
+    }
   }
 
-  async update({ params, request }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    const data = request.only(['fullName', 'email', 'role'])
-    user.merge(data)
-    await user.save()
-    return user
+  async update({ params, request, response }: HttpContext) {
+    try {
+      const user = await User.findOrFail(params.id)
+      const data = request.only(['fullName', 'email', 'role'])
+      user.merge(data)
+      await user.save()
+      return response.ok(apiResponse(true, 'Usuário atualizado com sucesso', user))
+    } catch {
+      return response.internalServerError(apiResponse(false, 'Erro ao atualizar usuário'))
+    }
   }
 
-  async destroy({ params }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    await user.delete()
-    return { message: 'User deleted successfully' }
+  async destroy({ params, response }: HttpContext) {
+    try {
+      const user = await User.findOrFail(params.id)
+      await user.delete()
+      return response.ok(apiResponse(true, 'Usuário deletado com sucesso'))
+    } catch {
+      return response.notFound(apiResponse(false, 'Usuário não encontrado'))
+    }
   }
 }

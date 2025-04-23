@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { getApiUrl } from '../utils/env'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333',
+  baseURL: getApiUrl(),
 })
 
 api.interceptors.request.use((config) => {
