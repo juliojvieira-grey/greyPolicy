@@ -1,57 +1,28 @@
 version: "3.8"
 
 services:
-  setup:
-    image: alpine
-    container_name: setup-runner
-    working_dir: /app
-    volumes:
-      - .:/app
-    entrypoint: ["/bin/sh", "-c"]
-    command: |
-      GREEN='\033[1;32m'
-      YELLOW='\033[1;33m'
-      RED='\033[1;31m'
-      RESET='\033[0m'
-      
-      if [ -d "./data/postgres" ] && [ -d "./backend/uploads/policies" ]; then
-        echo "${YELLOW}⚠️  Diretórios já existem. Setup não é necessário.${RESET}";
-        exit 0;
-      fi;
-      
-      echo "${GREEN}🔧 Criando diretórios de dados e uploads...${RESET}";
-      mkdir -p ./data/postgres;
-      mkdir -p ./backend/uploads/policies;
-      echo "📁 Diretório do PostgreSQL: $(realpath ./data/postgres)";
-      echo "📁 Diretório de uploads:    $(realpath ./backend/uploads/policies)";
-      
-      echo "${GREEN}🔒 Ajustando permissões...${RESET}";
-      CURRENT_UID=$(id -u);
-      if [ "$CURRENT_UID" -eq 0 ]; then
-        echo "${YELLOW}⚠️  Executando como root. Corrigindo dono para UID 1000...${RESET}";
-        chown -R 1000:1000 ./data/postgres;
-        chown -R 1000:1000 ./backend/uploads/policies;
-      else
-        echo "${GREEN}✅ Executando como usuário comum (UID $CURRENT_UID). Apenas chmod aplicado.${RESET}";
-      fi;
-      chmod -R 755 ./data/postgres;
-      chmod -R 755 ./backend/uploads/policies;
-      echo "${GREEN}✅ Setup concluído com sucesso!${RESET}"
 
   postgres:
     container_name: postgres
     image: postgres:15
     restart: unless-stopped
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - postgres_volume:/var/lib/postgresql/data
     env_file:
       - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
     ports:
       - "5432:5432"
     networks:
       - app_net
-    depends_on:
-      - setup
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -63,29 +34,45 @@ services:
       - "6379:6379"
     networks:
       - app_net
-    depends_on:
-      - setup
 
   adonis_app:
+    image: grey-policy-backend
     container_name: adonis_app
-    restart: unless-stopped
     build:
       context: ./backend
       dockerfile: Dockerfile
     depends_on:
-      - setup
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     env_file:
       - .env
     expose:
       - "3333"
     networks:
       - app_net
-    working_dir: /app
-    command: node build/server.js
     volumes:
       - ./backend/uploads:/app/uploads
+  
+  adonis_migration:
+    image: grey-policy-backend
+    container_name: adonis_migration
+    build:
+      context: ./backend
+    env_file:
+      - .env
+    depends_on:
+      adonis_app:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    command: ["sh", "/scripts/wait-for-it.sh", "postgres:5432", "--", "node", "ace", "migration:run && sleep 30"]
+    networks:
+      - app_net
+
+
+
 
   frontend:
     build:
@@ -101,11 +88,10 @@ services:
       - .env
     networks:
       - app_net
-    depends_on:
-      - setup
 
 volumes:
   postgres_volume:
+    name: greypolicy_postgres_volume
 
 networks:
   app_net:
